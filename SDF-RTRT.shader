@@ -90,6 +90,7 @@
             #define INTERSECTION 1
             #define SUBSTRACTION 2
             #define EPSILON 0.0001
+	    #define PI 3.14
             float opUnion(float d1, float d2,float k=-1) {
                 if(k<=0)
                     return min(d1,d2);
@@ -522,18 +523,18 @@
 
                 float3 camPosWS = _WorldSpaceCameraPos;
                 float3 rayWS;
-                float t = tan(_Fov * 3.14 / 180) * _Near;
+                float t = tan(_Fov * PI / 180) * _Near;
                 float r = t / aspect;
                 float2 offset = float2(uv.x *r, uv.y*t );
                 float2 noise=float2(0.01,0.01);
                 float3x3 mx = { 1,0,0,
-                             0,cos(_ViewDir.x * 3.14 / 180),-sin(_ViewDir.x * 3.14 / 180),
-                             0,sin(_ViewDir.x * 3.14 / 180),cos(_ViewDir.x * 3.14 / 180), };
-                float3x3 my = { cos(_ViewDir.y * 3.14 / 180),0,sin(_ViewDir.y * 3.14 / 180),
+                             0,cos(_ViewDir.x * PI / 180),-sin(_ViewDir.x * PI / 180),
+                             0,sin(_ViewDir.x * PI / 180),cos(_ViewDir.x * PI / 180), };
+                float3x3 my = { cos(_ViewDir.y * PI / 180),0,sin(_ViewDir.y * PI / 180),
                              0,1,0,
-                             -sin(_ViewDir.y * 3.14 / 180),0,cos(_ViewDir.y * 3.14 / 180), };
-                float3x3 mz = { cos(_ViewDir.z * 3.14 / 180),-sin(_ViewDir.z * 3.14 / 180),0,
-                             sin(_ViewDir.z * 3.14 / 180),cos(_ViewDir.z * 3.14 / 180),0,
+                             -sin(_ViewDir.y * PI / 180),0,cos(_ViewDir.y * PI / 180), };
+                float3x3 mz = { cos(_ViewDir.z * PI / 180),-sin(_ViewDir.z * PI / 180),0,
+                             sin(_ViewDir.z * PI / 180),cos(_ViewDir.z * PI / 180),0,
                              0,0,1, };
                 float3 col=0;
                 rayWS = normalize(float3(offset, 2));
