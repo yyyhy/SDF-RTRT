@@ -1,0 +1,46 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+
+Texture2D<float4> src;
+RWStructuredBuffer<int> ms;
+RWStructuredBuffer<float> fit;
+int w;
+int h;
+
+[numthreads(2,2,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    int n=id.x+(id.y*1*2)+(id.z*1*2*2*2);
+    int m=ms[n];
+    int lessm=1;
+    float clm=0;
+    int morem=1;
+    float mlm=0;
+    for(int i=0;i<w;i++){
+        for(int j=0;j<h;j++){
+            int index=j*w+i;
+            float2 uv=float2(j,i);
+            float gray=(src[uv].x+src[uv].y+src[uv].z)/3.0*255.0+1;
+            if(gray<=m){
+                lessm++;
+                clm+=gray;
+                
+            }
+            else{
+                morem++;
+                mlm+=gray;
+                
+            }
+        }
+    }
+    float u0=clm/lessm;
+    float u1=mlm/morem;
+    float u=(clm+mlm)/(lessm+morem);
+    float w0=clm/(clm+mlm);
+    float w1=mlm/(clm+mlm);
+    float r=w0*w1*pow(u0-u1,2);
+    fit[n]=r;
+}

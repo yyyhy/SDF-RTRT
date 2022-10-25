@@ -1,0 +1,47 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct point_data{
+    int lock;
+    float mass;
+    float3 pos;
+    float3 force;
+    float3 v;
+    int id;
+};
+struct spring_data{
+    float k;
+    float rest_length;
+    int p1;
+    int p2;
+};
+
+RWStructuredBuffer<spring_data> springs;
+RWStructuredBuffer<point_data> points;
+
+float norm(float3 d1){
+    return sqrt(d1.x*d1.x+d1.y*d1.y+d1.z*d1.z);
+}
+
+float3 normalize(float3 d){
+    float l=norm(d);
+    return float3(d.x/l,d.y/l,d.z/l);
+}
+
+[numthreads(4,8,12)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    int index=id.x+(id.y*5*4)+(id.z*5*10*4*8);
+    spring_data data=springs[index];
+    point_data pd1=points[data.p1];
+    point_data pd2=points[data.p2];
+    // if(data.p1==data.p2)
+    //     return;
+    float len=norm(pd1.pos-pd2.pos);
+    
+    float3 dir=normalize(pd1.pos-pd2.pos);
+    float3 force12=-data.k*dir*(len-data.rest_length);
+    points[data.p1].force+=force12;
+    points[data.p2].force-=force12;
+}

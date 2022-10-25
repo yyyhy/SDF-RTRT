@@ -1,0 +1,56 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+struct point_data{
+    int lock;
+    float mass;
+    float3 pos;
+    float3 force;
+    float3 v;
+    int id;
+};
+struct ForbiddenArea{
+    float3 center;
+    float r;
+};
+float3 wind_force=0;
+RWStructuredBuffer<point_data> points;
+RWStructuredBuffer<ForbiddenArea> areas;
+int size;
+float norm(float3 d1){
+    return sqrt(d1.x*d1.x+d1.y*d1.y+d1.z*d1.z);
+}
+
+bool inSphere(float3 p,float3 c,float r){
+    return norm(p-c)<=r;
+}
+
+bool inArea(float3 p){
+    for(int i=0;i<size;i++){
+        if(inSphere(p,areas[i].center,areas[i].r))
+            return true;
+    }
+    
+    return false;
+}
+
+[numthreads(4,8,12)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    int index=id.x+(id.y*5*4)+(id.z*5*10*4*8);
+    point_data p=points[index];
+    if(p.lock!=0){
+        float3 force=p.force-p.v*0.1;
+        float3 a=force/p.mass;
+        a+=float3(0,-10,0);
+        float3 v=p.v+a*0.02;
+        float3 pos=p.pos+v*0.02;
+        p.v=v;
+        if (!inArea(pos))
+            p.pos = pos;
+        else
+            p.v=0;
+        p.force=float3(0,0,0);
+        points[index]=p;
+    }
+}
